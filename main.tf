@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-west-2"
+  region = "us-east-1"
 }
 
 resource "aws_s3_bucket" "s3_bucket" {
@@ -87,3 +87,19 @@ resource "aws_s3_object" "error" {
 
   etag = filemd5("www/error.html")
 }
+
+# Create an IAM user for the storage bucket access
+resource "aws_iam_user" "bucket_user" {
+  name = "bucket-user"
+}
+
+# Generate an access key for the IAM user
+resource "aws_iam_access_key" "bucket_access_key" {
+  user = aws_iam_user.bucket_user.name
+}
+
+resource "aws_iam_user_policy_attachment" "s3_policy_attachment" {
+  user       = aws_iam_user.bucket_user.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+
